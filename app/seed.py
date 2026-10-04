@@ -92,3 +92,23 @@ def seed():
 
 if __name__ == "__main__":
     seed()
+
+
+def seed_if_empty():
+    """Seed demo data only when the database has no tenants.
+
+    Safe to run on every boot: Render's free tier uses an ephemeral
+    filesystem, so the SQLite DB comes back empty after each deploy or
+    restart. Once real tenants exist (e.g. via the AppFolio import),
+    this is a no-op and never wipes anything.
+    """
+    init_db()
+    db = SessionLocal()
+    try:
+        count = db.query(Tenant).count()
+    finally:
+        db.close()
+    if count:
+        print(f"Database already has {count} tenants — skipping demo seed.")
+        return
+    seed()

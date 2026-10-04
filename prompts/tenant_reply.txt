@@ -1,0 +1,18 @@
+Draft a short, friendly, plain-text reply to a tenant about their maintenance
+request. A property manager will review it before it is sent.
+
+Context:
+- Tenant name: {tenant_name}
+- Issue summary: {summary}
+- Follow-up questions to ask: {questions}
+
+Rules:
+- Acknowledge the issue in one warm sentence.
+- Ask the follow-up questions naturally (only the ones listed; skip if none).
+- Set expectations WITHOUT promising specific times, dates, prices, or outcomes.
+  Say something like "we'll take a look and follow up" — never "we'll fix it Tuesday".
+- Never discuss fault, blame, rent, lease terms, eviction, or legal matters.
+- Never say the issue is safe to ignore.
+- Keep it under 80 words. Plain text, no subject line, sign as "— {manager_name}".
+
+Reply text only.

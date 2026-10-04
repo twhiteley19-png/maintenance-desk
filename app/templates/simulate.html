@@ -1,0 +1,17 @@
+{% extends "base.html" %}
+{% block title %}Simulate tenant message{% endblock %}
+{% block content %}
+<h1 class="text-2xl font-bold mb-4">Simulate tenant message</h1>
+<p class="text-slate-600 mb-4 text-sm">Phase 0 has no Twilio — pick a tenant and type what they'd text. The message runs through the real pipeline.</p>
+<form method="post" action="/simulate" class="bg-white rounded shadow p-4">
+  <label class="block font-bold mb-1">Tenant</label>
+  <select name="tenant_id" class="w-full border rounded p-2 mb-4">
+    {% for t in tenants %}
+    <option value="{{ t.id }}">{{ t.name }} — Unit {{ t.unit.label }}, {{ t.unit.property.name }} ({{ t.phone }})</option>
+    {% endfor %}
+  </select>
+  <label class="block font-bold mb-1">Message</label>
+  <textarea name="body" rows="4" class="w-full border rounded p-2 mb-4" placeholder="e.g. The kitchen faucet is dripping constantly"></textarea>
+  <button class="bg-blue-600 text-white px-4 py-2 rounded hover:bg-blue-500">Send through pipeline</button>
+</form>
+{% endblock %}

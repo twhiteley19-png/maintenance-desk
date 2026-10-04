@@ -1,0 +1,35 @@
+{% extends "base.html" %}
+{% block title %}Approval queue{% endblock %}
+{% block content %}
+<h1 class="text-2xl font-bold mb-4">Approval queue <span class="text-base font-normal text-slate-500">({{ requests|length }} requests)</span></h1>
+{% if not requests %}
+<p class="text-slate-500">No requests yet. <a href="/simulate" class="text-blue-600 underline">Simulate a tenant message</a> to get started.</p>
+{% endif %}
+<div class="space-y-4">
+{% for r in requests %}
+  {% set border = "border-slate-300" %}
+  {% if r.urgency == "EMERGENCY" %}{% set border = "border-red-600" %}
+  {% elif r.urgency == "URGENT" %}{% set border = "border-amber-500" %}
+  {% elif r.status == "NEEDS_HUMAN" %}{% set border = "border-amber-400" %}{% endif %}
+  <a href="/requests/{{ r.id }}" class="block bg-white border-l-8 {{ border }} rounded shadow p-4 hover:shadow-md">
+    {% if r.status == "NEEDS_HUMAN_NOW" %}
+    <div class="bg-red-600 text-white font-bold text-sm px-3 py-1 rounded mb-2 inline-block">🚨 EMERGENCY — CALL MANAGER NOW{% if r.emergency_acknowledged %} (acknowledged){% endif %}</div>
+    {% endif %}
+    {% if r.after_hours_hold %}
+    <div class="bg-slate-600 text-white font-bold text-sm px-3 py-1 rounded mb-2 inline-block">⏸ Held until morning</div>
+    {% endif %}
+    <div class="flex flex-wrap gap-2 text-xs mb-2">
+      <span class="px-2 py-0.5 rounded bg-slate-200">#{{ r.id }}</span>
+      <span class="px-2 py-0.5 rounded bg-slate-200">{{ r.urgency }}</span>
+      <span class="px-2 py-0.5 rounded bg-slate-200">{{ r.category }}</span>
+      <span class="px-2 py-0.5 rounded bg-slate-200">{{ r.status }}</span>
+      <span class="px-2 py-0.5 rounded bg-slate-200">{{ r.created_at.strftime("%m/%d %H:%M") }}</span>
+    </div>
+    <p class="font-medium">{{ r.tenant.name }} — Unit {{ r.tenant.unit.label }}, {{ r.tenant.unit.property.name }}</p>
+    <p class="text-slate-700 mt-1">“{{ r.raw_message }}”</p>
+    {% if r.ai_summary %}<p class="text-sm text-slate-500 mt-1">AI: {{ r.ai_summary }}</p>{% endif %}
+    {% if r.needs_human_reason %}<p class="text-sm text-amber-700 mt-1">⚠️ {{ r.needs_human_reason }}</p>{% endif %}
+  </a>
+{% endfor %}
+</div>
+{% endblock %}

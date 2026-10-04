@@ -1,0 +1,56 @@
+{% extends "base.html" %}
+{% block title %}Request #{{ r.id }}{% endblock %}
+{% block content %}
+<a href="/queue" class="text-blue-600 text-sm hover:underline">← back to queue</a>
+{% if r.status == "NEEDS_HUMAN_NOW" %}
+<div class="bg-red-600 text-white font-bold px-4 py-3 rounded mt-3 mb-4">🚨 EMERGENCY — CALL MANAGER NOW. Do not rely on drafted messages below.</div>
+{% endif %}
+<h1 class="text-2xl font-bold mt-2 mb-4">Request #{{ r.id }}</h1>
+
+<div class="bg-white rounded shadow p-4 mb-4">
+  <div class="flex flex-wrap gap-2 text-xs mb-3">
+    <span class="px-2 py-0.5 rounded bg-slate-200">{{ r.urgency }}</span>
+    <span class="px-2 py-0.5 rounded bg-slate-200">{{ r.category }}</span>
+    <span class="px-2 py-0.5 rounded bg-slate-200">{{ r.status }}</span>
+  </div>
+  <p><strong>Tenant:</strong> {{ r.tenant.name }} ({{ r.tenant.phone }}) — Unit {{ r.tenant.unit.label }}, {{ r.tenant.unit.property.name }}</p>
+  <p class="mt-2"><strong>Raw message:</strong></p>
+  <p class="bg-slate-50 border rounded p-3 mt-1">“{{ r.raw_message }}”</p>
+  {% if r.ai_summary %}<p class="mt-2"><strong>AI summary:</strong> {{ r.ai_summary }}</p>{% endif %}
+  {% if r.follow_up_questions %}<p class="mt-2"><strong>Follow-up questions:</strong></p>
+  <ul class="list-disc ml-6 text-sm">{% for q in r.follow_up_questions.splitlines() %}<li>{{ q }}</li>{% endfor %}</ul>{% endif %}
+  {% if r.needs_human_reason %}<p class="mt-2 text-amber-700"><strong>⚠️ Needs human:</strong> {{ r.needs_human_reason }}</p>{% endif %}
+  {% if r.chosen_vendor %}<p class="mt-2"><strong>Chosen vendor:</strong> {{ r.chosen_vendor.name }} ({{ r.chosen_vendor.trade }}, {{ r.chosen_vendor.phone }})
+    {% if r.vendor_dispatch_sent_at %}· dispatch sent {{ r.vendor_dispatch_sent_at.strftime("%m/%d %H:%M") }}{% endif %}
+    {% if r.vendor_confirmed %}<span class="text-green-700 font-bold">· confirmed ✓</span>{% elif r.vendor_dispatch_sent_at %}<span class="text-amber-700">· awaiting confirmation{% if r.fallback_count %} (fallback #{{ r.fallback_count }}){% endif %}</span>{% endif %}</p>{% endif %}
+  {% if r.after_hours_hold %}<p class="mt-2 text-slate-600"><strong>⏸ Held until morning</strong> (received outside business hours)</p>{% endif %}
+  {% if r.fix_check_due_at and not r.fix_check_sent_at %}<p class="mt-2 text-slate-600">Fix check scheduled: {{ r.fix_check_due_at.strftime("%m/%d %H:%M") }}</p>{% endif %}
+  {% if r.fix_check_sent_at %}<p class="mt-2 text-slate-600">Fix check sent {{ r.fix_check_sent_at.strftime("%m/%d %H:%M") }}{% if r.fix_check_reply %} — tenant replied {{ r.fix_check_reply }}{% endif %}</p>{% endif %}
+</div>
+
+<form method="post" action="/requests/{{ r.id }}/action" class="bg-white rounded shadow p-4 mb-4">
+  <label class="block font-bold mb-1">Draft tenant reply <span class="font-normal text-slate-500 text-sm">(editable — nothing is sent until approved)</span></label>
+  <textarea name="draft_tenant_reply" rows="5" class="w-full border rounded p-2 mb-4">{{ r.draft_tenant_reply }}</textarea>
+  <label class="block font-bold mb-1">Draft vendor message <span class="font-normal text-slate-500 text-sm">(editable)</span></label>
+  <textarea name="draft_vendor_message" rows="6" class="w-full border rounded p-2 mb-4">{{ r.draft_vendor_message }}</textarea>
+  <label class="block font-bold mb-1">Manager note <span class="font-normal text-slate-500 text-sm">(optional, goes in the log)</span></label>
+  <input type="text" name="note" class="w-full border rounded p-2 mb-4" placeholder="e.g. called vendor, confirmed for tomorrow">
+  <div class="flex flex-wrap gap-3">
+    <button name="action" value="approve" class="bg-green-600 text-white px-4 py-2 rounded hover:bg-green-500">Approve (save edits &amp; send via Twilio)</button>
+    <button name="action" value="reject" class="bg-slate-500 text-white px-4 py-2 rounded hover:bg-slate-400">Reject</button>
+    <button name="action" value="escalate" class="bg-amber-600 text-white px-4 py-2 rounded hover:bg-amber-500">Escalate</button>
+  </div>
+</form>
+
+<div class="bg-white rounded shadow p-4">
+  <h2 class="font-bold mb-2">Message log</h2>
+  <div class="space-y-2 text-sm">
+  {% for e in r.log|sort(attribute="timestamp") %}
+    <div class="border-l-4 pl-3 {% if e.direction == 'in' %}border-blue-400{% elif e.direction == 'out' %}border-green-400{% else %}border-slate-300{% endif %}">
+      <span class="text-xs text-slate-500">{{ e.timestamp.strftime("%m/%d %H:%M") }} · {{ e.direction }}</span>
+      <pre class="whitespace-pre-wrap font-sans">{{ e.body }}</pre>
+    </div>
+  {% endfor %}
+  </div>
+</div>
+{% endblock %}

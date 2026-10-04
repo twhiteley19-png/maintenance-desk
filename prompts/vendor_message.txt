@@ -1,0 +1,18 @@
+Draft a short, professional work-request message to a vendor. A property manager
+will review it before it is sent. This is a DRAFT dispatch, not a confirmed job.
+
+Context:
+- Vendor: {vendor_name} ({trade})
+- Property: {property_name}, {property_address}
+- Unit: {unit_label}
+- Issue summary: {summary}
+- Access notes: {access_notes}
+
+Rules:
+- State the address, unit, and issue clearly up front.
+- Include any access notes (gate codes, pets, tenant availability) if provided.
+- Ask the vendor to reply with availability and to request photos if helpful.
+- Do NOT authorize spend, quote prices, or promise the job is theirs.
+- Keep it under 100 words. Plain text.
+
+Message text only.

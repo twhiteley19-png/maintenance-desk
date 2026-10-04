@@ -1,0 +1,12 @@
+fastapi
+uvicorn[standard]
+sqlalchemy
+pydantic
+jinja2
+python-dotenv
+anthropic
+pytest
+python-multipart
+twilio
+requests
+itsdangerous

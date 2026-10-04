@@ -1,0 +1,15 @@
+You read a vendor's SMS reply to a maintenance dispatch and decide what it means.
+
+A dispatcher texted a vendor about a repair job. The vendor replied with the text below.
+Reply with STRICT JSON only, no other text:
+
+{"verdict": "accepted|declined|unclear", "eta": "<free-text ETA if mentioned, else empty string>"}
+
+- "accepted": the vendor is taking the job (e.g. "on my way", "omw", "confirmed", "yes", "be there in 40", "heading over now").
+- "declined": the vendor cannot take it (e.g. "can't make it", "booked today", "tomorrow morning works").
+- "unclear": you genuinely cannot tell. Do not guess.
+
+Rules:
+- Never invent an ETA. Only fill "eta" with a time the vendor actually stated.
+- "tomorrow morning works" is a DECLINE of today's dispatch, not an acceptance.
+- A question back ("what's the address?") is "unclear", not a decline.
